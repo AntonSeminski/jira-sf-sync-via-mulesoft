@@ -1,47 +1,34 @@
-# ------------------------------------------------------------------------------ #
-# Java defaults (https://github.com/github/gitignore/blob/master/Java.gitignore) #
-# ------------------------------------------------------------------------------ #
-*.class
-
-# Package Files #
-*.jar
-*.war
-*.ear
-
-# ------------------------------------------------------------------------------------------- #
-# Eclipse-specific (https://github.com/github/gitignore/blob/master/Global/Eclipse.gitignore) #
-# ------------------------------------------------------------------------------------------- #
-*.pydevproject
-.metadata
-bin/**
-tmp/**
-tmp/**/*
-*.tmp
-*.bak
-*.swp
-*~.nib
-local.properties
-.settings/
-.loadpath
-.project
+# Anypoint Studio
+.target/
 .classpath
+.project
+.settings/
+bin/
 
-# External tool builders
-.externalToolBuilders/
-
-# Locally stored "Eclipse launch configurations"
-*.launch
-
-# CDT-specific
-.cproject
-
-# PDT-specific
-.buildpath
-
-# --------------- #
-# Studio-specific #
-# --------------- #
-target/
+# Mule runtime & local runs
 .mule/
+*.log
+
+# Local deployment artifacts
+deployments/
+archive/
+
+# OS / Editor files
 .DS_Store
-velocity.log
+Thumbs.db
+*.swp
+*~
+
+# Dependencies (optional — some teams exclude, some include)
+src/test/resources/libs/
+lib/
+
+# Local AnyPoint credentials (CRITICAL!)
+./.anypoint/
+anypoint.yml
+
+# Never commit any real credentials or local configs
+src/main/resources/application.yaml
+src/main/resources/config-*.yaml
+src/main/resources/*.properties
+!src/main/resources/config-template.yaml
