@@ -1,0 +1,154 @@
+#%RAML 1.0
+title: Jira Sub-Issue Listener API
+version: v1
+baseUri: /api/{version}
+
+mediaType: application/json
+
+documentation:
+  - title: Overview
+    content: |
+      This endpoint receives webhooks from Jira for 'issue_created' and 'issue_updated' events specifically for sub-tasks. It maps the issue data to the Salesforce Position__c custom object and performs an upsert operation using Jira_Task_ID__c as the external ID.
+
+/listenToJiraSubTaskCreation:
+  post:
+    displayName: Listen to Jira Sub-Task Creation/Update
+    description: Receives a webhook payload for a Jira sub-issue event. Only processes sub-tasks that are created or updated.
+    body:
+      application/json:
+        type: JiraSubIssueWebhook
+        example: |
+          {
+            "issue_event_type_name": "issue_created",
+            "issue": {
+              "id": "10020",
+              "key": "SCRUM-1/T-1",
+              "fields": {
+                "issuetype": {
+                  "subtask": true,
+                  "name": "Sub-task"
+                },
+                "parent": {
+                  "id": "10010"
+                },
+                "summary": "Implement Feature X in Sprint 1",
+                "description": "Details about the implementation task...",
+                "assignee": {
+                  "name": "john.doe"
+                },
+                "status": {
+                  "name": "To Do"
+                },
+                "priority": {
+                  "name": "High"
+                },
+                "duedate": "2025-12-15",
+                "created": "2025-11-28T10:00:00.00Z",
+                "attachmentIds": [ "10050", "10051" ],
+                "customfield_10143": "candidate.email@example.com",
+                "customfield_10144": "Jane Doe",
+                "customfield_UUID": "a1b2c3d4e5f6",
+                "customfield_10105": "006OpportunityId"
+              }
+            }
+          }
+    responses:
+      200:
+        description: Webhook received. Returns the result of the Salesforce upsert operation (Success/Failure) or a log message if filtered out.
+        body:
+          application/json:
+            type: array | string
+            description: Salesforce bulk result response.
+
+types:
+  JiraSubIssueWebhook:
+    type: object
+    properties:
+      issue_event_type_name:
+        type: string
+        enum: [issue_created, issue_updated]
+        required: true
+        description: Must be a creation or update event to be processed.
+      issue:
+        type: object
+        properties:
+          id:
+            type: string
+            required: true
+            description: Jira Sub-Issue ID. Mapped to the external ID field 'Jira_Task_ID__c' in Salesforce.
+          key:
+            type: string
+            required: true
+            description: Jira Issue Key (e.g., SCRUM-1/T-1). Used for Jira_URL__c.
+          fields:
+            type: object
+            properties:
+              issuetype:
+                type: object
+                properties:
+                  subtask:
+                    type: boolean
+                    enum: [true]
+                    required: true
+                    description: Must be true for the flow to process the issue.
+                  name:
+                    type: string
+                    required: true
+                    description: Mapped to Position_Type__c.
+              parent:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    required: true
+                    description: ID of the parent Jira issue. Mapped to Jira_Parent_Task_ID__c.
+              summary:
+                type: string
+                required: true
+                description: Mapped to Name and Position_Name__c in Salesforce.
+              description:
+                type: any
+                description: Mapped to Description__c.
+              assignee:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: Mapped to Assigned_To_Jira__c.
+              status:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    required: true
+                    description: Mapped to Status__c.
+              priority:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    required: true
+                    description: Mapped to Priority__c.
+              duedate:
+                type: date-only | nil
+                description: Mapped to Due_Date__c.
+              created:
+                type: datetime
+                required: true
+                description: Creation timestamp. Mapped to Start_Date__c.
+              attachmentIds:
+                type: array
+                items: string
+                description: List of attachment IDs used to count attachments (Attachment_Count__c).
+              customfield_10143:
+                type: string | nil
+                description: Mapped to Candidate_Email__c.
+              customfield_10144:
+                type: string | nil
+                description: Mapped to Candidate_Name__c.
+              customfield_UUID:
+                type: string | nil
+                description: Mapped to UUID__c.
+              customfield_10105:
+                type: string | nil
+                description: Mapped to the master Opportunity__c lookup field.

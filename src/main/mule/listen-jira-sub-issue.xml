@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule 
+    xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+    xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+    xmlns="http://www.mulesoft.org/schema/mule/core"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:http="http://www.mulesoft.org/schema/mule/http"
+    xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule-core.xsd
+        http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+        http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+
+   
+   
+	<salesforce:sfdc-config name="Salesforce_Config_2" doc:name="Salesforce Config" doc:id="553d065a-c640-4d47-9786-3efd0c94aba2" >
+		<salesforce:basic-connection username="dev-excel@check.com" password="Excel1-2" securityToken="EIED11KOyF2Oc8LSxCecUYxM" />
+	</salesforce:sfdc-config>
+   
+   	<flow name="listenJiraSubIssueWebhookFlow">
+        <http:listener 
+            doc:name="Jira Sub Issue Created Listener" 
+            config-ref="HTTP_Listener_Config" 
+            path="/api/v1/listenToJiraSubTaskCreation"/>
+
+        <logger level="INFO" message="Jira Issue webhook received: #[payload]" doc:name="Log webhook payload" />
+		<choice doc:name="Is Create or Update Jira Sub Issue" doc:id="c00a1be2-4678-469d-aaf7-f897d001e692" >
+			<when expression='#[payload.issue.fields.issuetype.subtask == true and (payload.issue_event_type_name == "issue_created" or payload.issue_event_type_name == "issue_updated")]'>
+				<ee:transform doc:name="Transform Message" doc:id="cff23859-71c9-404e-9ecb-41611a57f8bc">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+import * from dw::core::Dates
+
+//output application/json
+output application/java
+
+var issue = payload.issue
+var f = issue.fields
+---
+[{
+    Jira_Task_ID__c: issue.id,
+    Jira_Parent_Task_ID__c: f.parent.id,
+    //Jira_Project_Key__c: split(issue.key,"-")[0],
+    Jira_URL__c: "https://semin-top.atlassian.net/browse/" ++ (issue.key default ""),
+
+    Name: f.summary,
+    Position_Name__c: f.summary,
+    Position_Type__c: f.issuetype.name,
+
+    Assigned_To_Jira__c: f.assignee.name,
+    Assigned_To_SF__c: null,              // Will be set by assignment logic later
+
+    Description__c: f.description,
+
+    Status__c: f.status.name,
+    Priority__c: f.priority.name,
+    
+    Due_Date__c: f.duedate as Date {format: "yyyy-MM-dd"} default null,
+
+    Start_Date__c: if (f.created != null) (f.created as DateTime {
+    format: "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+  }) else null,
+    Last_Synced_Datetime__c: now(),
+
+    Candidate_Email__c: f.customfield_10143,
+    Candidate_Name__c: f.customfield_10144,
+
+    Attachment_Count__c: sizeOf(f.attachmentIds default []),
+
+    Created_by_Integration__c: true,
+    Source_System__c: "Jira",
+    Sync_Status__c: "Synced",
+    Integration_Error_Message__c: null,
+    Is_Deleted_in_Jira__c: false,
+
+    UUID__c: f.customfield_UUID default null,
+
+    Opportunity__c: f.customfield_10105
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<logger level="INFO" message="Extracted: #[payload]" doc:name="Log extracted payload to console" />
+				<salesforce:upsert 
+				    doc:name="Upsert" 
+				    doc:id="6d40be2a-8485-4458-8701-6aaeb358a1c3" 
+				    config-ref="Salesforce_Config_2" 
+				    objectType="Position__c" 
+				    externalIdFieldName="Jira_Task_ID__c" 
+				    target="bulk_result">  
+				    <error-mapping targetType="APP:BULK-ERROR" />
+		</salesforce:upsert>
+		<ee:transform doc:name="Prepare Upsert Response" >
+        <ee:message>
+            <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.bulk_result]]>
+            </ee:set-payload>
+        </ee:message>
+    </ee:transform>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="33cbb3fb-56e9-4f91-a200-7a759e47e3c7" message="HANDLE NON SUBTASK ROUTE"/>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="4a39089e-d6e8-4a7d-b7bb-4852a21f9917" message="After payload: #[payload] "/>
+
+    </flow>
+
+</mule>

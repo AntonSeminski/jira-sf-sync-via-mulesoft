@@ -1,0 +1,88 @@
+#%RAML 1.0
+title: Jira Salesforce Task Creator API
+version: v1
+baseUri: /api/{version}
+
+mediaType: application/json
+
+documentation:
+  - title: Overview
+    content: |
+      This API endpoint is designed to receive a Salesforce Opportunity-like object and automatically create a corresponding Task issue in a connected Jira instance.
+
+/createJiraTask:
+  post:
+    displayName: Create Jira Task
+    description: Creates a new Jira Task issue using data mapped from an incoming payload (e.g., a Salesforce Opportunity).
+    body:
+      application/json:
+        type: TaskCreationInput
+        example: |
+          {
+            "Name": "New Client Onboarding Project",
+            "Description": "Automated task for setting up a new client account following opportunity closure.",
+            "CloseDate": "2025-11-30",
+            "OwnerEmail": "integration.user@company.com",
+            "Id": "006xxxxxxxxxxxx",
+            "StageName": "Closed Won",
+            "AccountName": "Acme Corp",
+            "Amount": 150000.00,
+            "Type": "New Business"
+          }
+    responses:
+      200:
+        description: Jira issue created successfully.
+        body:
+          application/json:
+            type: object
+            example: |
+              {
+                "id": "10000",
+                "key": "SCRUM-1",
+                "self": "https://your-domain.atlassian.net/rest/api/3/issue/10000"
+              }
+      400:
+        description: Invalid request payload.
+      500:
+        description: Internal server error (e.g., Jira connection issue or DataWeave mapping failure).
+
+types:
+  TaskCreationInput:
+    type: object
+    properties:
+      Name:
+        type: string
+        required: true
+        description: Used for the Jira 'Summary' field.
+      Description:
+        type: string
+        required: false
+        description: Used for the Jira 'Description' field. Defaults to "Job Request " + Name if not present.
+      CloseDate:
+        type: date-only | nil
+        required: false
+        description: Used for the Jira 'Due Date'. Expected format is YYYY-MM-DD.
+      OwnerEmail:
+        type: string
+        required: false
+        description: Used for the Jira 'Assignee' (by email address).
+      Id:
+        type: string
+        required: false
+        description: Mapped to customfield_10105 (e.g., Salesforce Opportunity ID).
+      StageName:
+        type: string
+        required: false
+        description: Mapped to customfield_10106 (e.g., Salesforce Opportunity Stage).
+      AccountName:
+        type: string
+        required: false
+        description: Mapped to customfield_10107 (e.g., Salesforce Account Name).
+      Amount:
+        type: number | nil
+        required: false
+        description: Mapped to customfield_10108 (e.g., Salesforce Opportunity Amount). Must be a number.
+      Type:
+        type: string
+        required: false
+        description: Mapped to customfield_10109 (e.g., Salesforce Opportunity Type).

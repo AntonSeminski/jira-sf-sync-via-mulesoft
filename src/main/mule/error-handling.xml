@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule 
+    xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+    xmlns="http://www.mulesoft.org/schema/mule/core"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:http="http://www.mulesoft.org/schema/mule/http"
+    xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
+    xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule-core.xsd
+        http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+        http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+    <error-handler name="globalErrorHandler">
+  <on-error-propagate enableNotifications="true" logException="true">
+    <logger level="ERROR" message="Error: #[error.description]" />
+    <set-payload value="#[{ error: error.description }]"/>
+    <set-variable value="500" doc:name="Set Variable" doc:id="e75e7870-5b1a-4435-af3a-636db6183be0" variableName="http.status"/>
+  </on-error-propagate>
+</error-handler>
+
+</mule>

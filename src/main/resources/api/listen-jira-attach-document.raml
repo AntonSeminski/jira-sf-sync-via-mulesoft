@@ -1,0 +1,55 @@
+#%RAML 1.0
+title: Jira Attachment Listener API
+version: v1
+baseUri: /api/{version}
+
+mediaType: application/json
+
+documentation:
+  - title: Overview
+    content: |
+      This endpoint is configured as a Jira Webhook listener to process 'attachment_created' events and synchronize the file to a linked Salesforce Opportunity.
+
+/listenToJiraAttachmentCreation:
+  post:
+    displayName: Listen to Jira Attachment
+    description: Receives a webhook notification when a new attachment is added to a Jira issue.
+    queryParameters:
+      issueId:
+        type: string
+        required: true
+        description: The ID of the Jira issue the attachment was added to. This is essential for looking up the linked Salesforce Opportunity.
+    body:
+      application/json:
+        type: object
+        properties:
+          webhookEvent:
+            type: string
+            enum: [attachment_created]
+          attachment:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The attachment's unique ID.
+              filename:
+                type: string
+              mimeType:
+                type: string
+        example: |
+          {
+            "webhookEvent": "attachment_created",
+            "timestamp": 1732704000000,
+            "issue": { 
+              "id": "10001", 
+              "key": "SCRUM-1" 
+            },
+            "attachment": {
+              "id": "10010",
+              "filename": "project_report.pdf",
+              "mimeType": "application/pdf"
+            }
+          }
+    responses:
+      200:
+        description: Webhook received and processed (or ignored, if not an attachment_created event).

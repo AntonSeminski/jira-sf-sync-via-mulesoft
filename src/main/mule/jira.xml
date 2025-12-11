@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:jira="http://www.mulesoft.org/schema/mule/jira"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd 
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+        http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/jira http://www.mulesoft.org/schema/mule/jira/current/mule-jira.xsd">
+
+	  <http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config">
+	  	<http:listener-connection host="${http.host}" port="${http.port}"/>
+	  </http:listener-config>
+	
+	  <http:request-config name="Jira_HTTP_Request_Config" basePath="/rest/api/3" doc:name="Jira HTTP Request Config">
+	    <http:request-connection host="${jira.domain}" protocol="HTTPS"/>
+	  </http:request-config>
+  
+  	<configuration-properties doc:name="Configuration properties" doc:id="85209937-2100-49b4-bbc2-26f704aabeb9" file="${env}.yaml" />
+	<global-property doc:name="Global Property" doc:id="7d8f7f6a-4588-4538-80cc-c3e5201c02c6" name="env" value="application" />
+	
+	<jira:config name="Jira_Attachment_Connector_Config" doc:name="Jira Connector Config" doc:id="6b2064c9-cfc1-4049-9723-0bb9148c6a1e" >
+		<jira:basic-auth-connection username="${jira.domain}" password="${jira.token}" baseUri="${jira.baseUrl}/api/2/attachment/content/" />
+	</jira:config>
+
+	<http:request-config name="Jira_Attachmen_HTTP_Request_Configuration" basePath="${jira.attachmentPath}">
+		  <http:request-connection
+		  	  protocol="HTTPS"
+		      host="${jira.host}">
+		    <http:authentication>
+		      <http:basic-authentication username="${jira.username}" password="${jira.token}"/>
+		    </http:authentication>
+		  </http:request-connection>
+		</http:request-config>
+		<!-- Decomment this if you plan to deploy to remote -->
+	<!-- <api-gateway:autodiscovery apiId="${apiId}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="3ac5b1bc-ec4c-4a93-a5ca-b2cfd7b66aec" flowRef="createJiraTaskFlow" />
+	<api-gateway:autodiscovery apiId="${apiId}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="c4c3c221-dd8a-4832-a2b5-9881d5e091ab" flowRef="jira-attachment-to-sf-flow" />
+	<api-gateway:autodiscovery apiId="${apiId}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="76415919-2e4b-4777-97ab-484b045e0d3d" flowRef="listenJiraIssueWebhookFlow"/>
+	<api-gateway:autodiscovery apiId="${apiId}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="4e9827a7-2952-4614-942b-fd806a6c88b3" flowRef="listenJiraSubIssueWebhookFlow" />
+ -->
+</mule>

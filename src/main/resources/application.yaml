@@ -1,0 +1,19 @@
+apiId: "20640502"
+
+http:
+  host: "0.0.0.0"
+  port: "8085"
+
+jira_project: "SCRUM"
+
+jira:
+  project: "SCRUM"
+  domain: "semin-top.atlassian.net"
+  username: "semin240@gmail.com"
+  token: "{jiraToken}"
+  baseUrl: "https://semin-top.atlassian.net"
+  host: "semin-top.atlassian.net"
+  attachmentPath: "/rest/api/2/attachment/content/"
+
+mule:
+  environment: "dev"
