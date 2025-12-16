@@ -53,7 +53,7 @@ var opp = payload
 {
                 fields: {
                     project: {
-                        key: "SCRUM"
+                    	key: p('jira.create.projectKey')
                     },
                     summary: opp.Name,
                     "description": {
@@ -72,17 +72,17 @@ var opp = payload
 					      ]
 					    },
                     issuetype: {
-                        name: "Task"
+                        name: p('jira.create.issueType')
                     },
                     duedate: opp.CloseDate,
                     assignee: {
 				 	    emailAddress: opp.OwnerEmail
     				},
-				    customfield_10105: opp.Id,
-				    customfield_10106: opp.StageName,
-				    customfield_10107: opp.AccountName,
-				    customfield_10108: opp.Amount as Number,
-				    customfield_10109: opp.Type
+				    (p('jira.field.opportunityId')): opp.Id,
+				    (p('jira.field.stageName')): opp.StageName,
+				    (p('jira.field.accountName')): opp.AccountName,
+				    (p('jira.field.amount')): opp.Amount as Number,
+				    (p('jira.field.type')): opp.Type
                 }
 }]]></ee:set-payload>
 			</ee:message>

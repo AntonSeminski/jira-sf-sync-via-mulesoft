@@ -14,7 +14,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		
         
        	<http:listener doc:name="Jira Attachment Webhook Listener" config-ref="HTTP_Listener_Config" 
-			path="/api/v1/listenToJiraAttachmentCreation">
+			path="${http.attachment.listener.path}">
             <http:response statusCode="#[200]"/>
 		</http:listener>
         
@@ -132,7 +132,7 @@ output application/java
 [{
 	"ContentDocumentId": payload[0].ContentDocumentId,
 	"LinkedEntityId": vars.opportunityId, 
-	"ShareType": "V" 
+	"ShareType": p('salesforce.contentdocumentlink.shareType') 
 }]]]></ee:set-payload>
                             </ee:message>
                         </ee:transform>

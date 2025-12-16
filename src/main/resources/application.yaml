@@ -1,8 +1,16 @@
+mule:
+  environment: "dev"
 apiId: "20640502"
+
+
 
 http:
   host: "0.0.0.0"
   port: "8085"
+  attachment:
+    listener:
+      path: "/api/v1/listenToJiraAttachmentCreation" # Used in listen-jira-attach-document.xml: <http:listener path>
+
 
 jira_project: "SCRUM"
 
@@ -10,10 +18,54 @@ jira:
   project: "SCRUM"
   domain: "semin-top.atlassian.net"
   username: "semin240@gmail.com"
-  token: "{jiraToken}"
+  token: "$$$API TOKEN FROM JIRA$$$"
   baseUrl: "https://semin-top.atlassian.net"
   host: "semin-top.atlassian.net"
-  attachmentPath: "/rest/api/2/attachment/content/"
+  attachmentPath: "/rest/api/2/attachment/content/" # Base URL for creating Jira links in Salesforce (for visibility)
+  issue:
+    base:
+      url: "https://semin-top.atlassian.net/browse/" # Used in listen-jira-issue.xml: DW mapping Jira_URL__c
 
-mule:
-  environment: "dev"
+  # Defaults for creating a new Jira issue from Salesforce (create-jira-task.xml)
+  create:
+    projectKey: "SCRUM"                        # Used in create-jira-task.xml: DW mapping project.key
+    issueType: "Task"                          # Used in create-jira-task.xml: DW mapping issuetype.name
+
+  # Jira Custom Field IDs
+  # These IDs are unique to your Jira instance and MUST be externalized.
+  field:
+    opportunityId: "customfield_10105"         # Used in create-jira-task.xml, listen-jira-issue.xml, listen-jira-sub-issue.xml
+    stageName: "customfield_10106"             # Used in create-jira-task.xml
+    accountName: "customfield_10107"           # Used in create-jira-task.xml
+    amount: "customfield_10108"                # Used in create-jira-task.xml, listen-jira-issue.xml
+    type: "customfield_10109"                  # Used in create-jira-task.xml
+    # Note: customfield_10143, _10144, and _UUID are also present but are not hardcoded values, just referenced custom fields.
+
+  # Jira Priority to Salesforce Opportunity Probability Mappings
+  # Used in both listen-jira-issue.xml and listen-jira-sub-issue.xml DataWeave transforms.
+  probability:
+    highest: "90"
+    high: "70"
+    medium: "50"
+    low: "30"
+    default: "10"
+
+salesforce:
+  # Credentials used in Salesforce_Config connector (in listen-jira-sub-issue.xml)
+  username: "dev-excel@check.com"               # Used in listen-jira-sub-issue.xml: <salesforce:basic-connection>
+  password: "Excel1-2"                         # Used in listen-jira-sub-issue.xml: <salesforce:basic-connection>
+  securityToken: "EIED11KOyF2Oc8LSxCecUYxM"    # Used in listen-jira-sub-issue.xml: <salesforce:basic-connection>
+
+  # Salesforce Object Types and External IDs
+  position:
+    objectType: "Position__c"                  # Used in listen-jira-sub-issue.xml: <salesforce:upsert objectType="Position__c">
+    externalIdFieldName: "Jira_Task_ID__c"     # Used in listen-jira-sub-issue.xml: <salesforce:upsert externalIdFieldName="Jira_Task_ID__c">
+
+  # Salesforce Attachment Configuration
+  contentdocumentlink:
+    shareType: "V"                             # Used in listen-jira-attach-document.xml: DW mapping: "ShareType": "V"
+
+integration:
+  sourceSystem: "Jira"                             # Used in listen-jira-sub-issue.xml: DW mapping Source_System__c
+  syncStatus: "Synced"                             # Used in listen-jira-sub-issue.xml: DW mapping Sync_Status__c
+  createdByIntegration: "true"                     # Used in listen-jira-sub-issue.xml: DW mapping Created_by_Integration__c

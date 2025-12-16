@@ -14,7 +14,7 @@ http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mu
 
 
 	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="c469b59c-e858-45cd-a3ed-cb0682dcdb6d" >
-		<salesforce:basic-connection username="dev-excel@check.com" password="Excel1-2" securityToken="EIED11KOyF2Oc8LSxCecUYxM" />
+		<salesforce:basic-connection username="${salesforce.username}" password="${salesforce.password}" securityToken="${salesforce.securityToken}" />
 	</salesforce:sfdc-config>
 
     <flow name="listenJiraIssueWebhookFlow">
@@ -36,7 +36,7 @@ var f = issue.fields
 [{
     Id: f.customfield_10105,
     Jira_Key__c: issue.key,
-    Jira_URL__c: "https://semin-top.atlassian.net/browse/" ++ issue.key,
+    Jira_URL__c: p('jira.issue.base.url') ++ issue.key,
 
     Name: f.summary,
     Description: f.description,
@@ -45,12 +45,12 @@ var f = issue.fields
 
     Amount: f.customfield_10108 default null,
     Probability: 
-        (f.priority.name match {
-            case "Highest" -> 90
-            case "High" -> 70
-            case "Medium" -> 50
-            case "Low" -> 30
-            else -> 10
+        (f.priority.name match { 
+        	case "Highest" -> p('jira.probability.highest') 
+        	case "High" -> p('jira.probability.high') 
+        	case "Medium" -> p('jira.probability.medium') 
+        	case "Low" -> p('jira.probability.low')
+        	else -> p('jira.probability.default')
         }),
 
 

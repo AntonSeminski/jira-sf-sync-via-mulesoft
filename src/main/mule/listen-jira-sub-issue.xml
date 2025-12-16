@@ -15,7 +15,7 @@ http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mu
    
    
 	<salesforce:sfdc-config name="Salesforce_Config_2" doc:name="Salesforce Config" doc:id="553d065a-c640-4d47-9786-3efd0c94aba2" >
-		<salesforce:basic-connection username="dev-excel@check.com" password="Excel1-2" securityToken="EIED11KOyF2Oc8LSxCecUYxM" />
+		<salesforce:basic-connection username="${salesforce.username}" password="${salesforce.password}" securityToken="${salesforce.securityToken}" />
 	</salesforce:sfdc-config>
    
    	<flow name="listenJiraSubIssueWebhookFlow">
@@ -42,7 +42,7 @@ var f = issue.fields
     Jira_Task_ID__c: issue.id,
     Jira_Parent_Task_ID__c: f.parent.id,
     //Jira_Project_Key__c: split(issue.key,"-")[0],
-    Jira_URL__c: "https://semin-top.atlassian.net/browse/" ++ (issue.key default ""),
+    Jira_URL__c: p('jira.issue.base.url') ++ issue.key,
 
     Name: f.summary,
     Position_Name__c: f.summary,
@@ -68,9 +68,9 @@ var f = issue.fields
 
     Attachment_Count__c: sizeOf(f.attachmentIds default []),
 
-    Created_by_Integration__c: true,
-    Source_System__c: "Jira",
-    Sync_Status__c: "Synced",
+    Created_by_Integration__c: p('integration.createdByIntegration'),
+    Source_System__c: p('integration.sourceSystem'),
+    Sync_Status__c: p('integration.syncStatus'),
     Integration_Error_Message__c: null,
     Is_Deleted_in_Jira__c: false,
 
@@ -85,8 +85,8 @@ var f = issue.fields
 				    doc:name="Upsert" 
 				    doc:id="6d40be2a-8485-4458-8701-6aaeb358a1c3" 
 				    config-ref="Salesforce_Config_2" 
-				    objectType="Position__c" 
-				    externalIdFieldName="Jira_Task_ID__c" 
+				    objectType="${salesforce.position.objectType}" 
+				    externalIdFieldName="${salesforce.position.externalIdFieldName}" 
 				    target="bulk_result">  
 				    <error-mapping targetType="APP:BULK-ERROR" />
 		</salesforce:upsert>
