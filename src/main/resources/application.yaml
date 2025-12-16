@@ -6,7 +6,7 @@ apiId: "20640502"
 
 http:
   host: "0.0.0.0"
-  port: "8085"
+  port: "8081"
   attachment:
     listener:
       path: "/api/v1/listenToJiraAttachmentCreation" # Used in listen-jira-attach-document.xml: <http:listener path>
@@ -15,30 +15,29 @@ http:
 jira_project: "SCRUM"
 
 jira:
-  project: "SCRUM"
-  domain: "semin-top.atlassian.net"
-  username: "semin240@gmail.com"
-  token: "$$$API TOKEN FROM JIRA$$$"
-  baseUrl: "https://semin-top.atlassian.net"
-  host: "semin-top.atlassian.net"
+  domain: "semin-top.atlassian.net" # {Update} Base domain url from Jira Cloud
+  username: "semin240@gmail.com" # {Update} Jira Username
+  token: "$$$API TOKEN FROM JIRA$$$" # {Update} Jira Api token from connected app
+  baseUrl: "https://semin-top.atlassian.net" # {Update} Jira Base Url
+  host: "semin-top.atlassian.net" # {Update} Base domain url from Jira Cloud
   attachmentPath: "/rest/api/2/attachment/content/" # Base URL for creating Jira links in Salesforce (for visibility)
   issue:
     base:
-      url: "https://semin-top.atlassian.net/browse/" # Used in listen-jira-issue.xml: DW mapping Jira_URL__c
+      url: "https://semin-top.atlassian.net/browse/" # {Update} Used in listen-jira-issue.xml: DW mapping Jira_URL__c
 
   # Defaults for creating a new Jira issue from Salesforce (create-jira-task.xml)
   create:
-    projectKey: "SCRUM"                        # Used in create-jira-task.xml: DW mapping project.key
+    projectKey: "SCRUM"                        # {Update} Used in create-jira-task.xml: DW mapping project.key
     issueType: "Task"                          # Used in create-jira-task.xml: DW mapping issuetype.name
 
   # Jira Custom Field IDs
   # These IDs are unique to your Jira instance and MUST be externalized.
   field:
-    opportunityId: "customfield_10105"         # Used in create-jira-task.xml, listen-jira-issue.xml, listen-jira-sub-issue.xml
-    stageName: "customfield_10106"             # Used in create-jira-task.xml
-    accountName: "customfield_10107"           # Used in create-jira-task.xml
-    amount: "customfield_10108"                # Used in create-jira-task.xml, listen-jira-issue.xml
-    type: "customfield_10109"                  # Used in create-jira-task.xml
+    opportunityId: "customfield_10105"         # {Update} Used in create-jira-task.xml, listen-jira-issue.xml, listen-jira-sub-issue.xml
+    stageName: "customfield_10106"             # {Update} Used in create-jira-task.xml
+    accountName: "customfield_10107"           # {Update} Used in create-jira-task.xml
+    amount: "customfield_10108"                # {Update} Used in create-jira-task.xml, listen-jira-issue.xml
+    type: "customfield_10109"                  # {Update} Used in create-jira-task.xml
     # Note: customfield_10143, _10144, and _UUID are also present but are not hardcoded values, just referenced custom fields.
 
   # Jira Priority to Salesforce Opportunity Probability Mappings
@@ -52,9 +51,9 @@ jira:
 
 salesforce:
   # Credentials used in Salesforce_Config connector (in listen-jira-sub-issue.xml)
-  username: "dev-excel@check.com"               # Used in listen-jira-sub-issue.xml: <salesforce:basic-connection>
-  password: "Excel1-2"                         # Used in listen-jira-sub-issue.xml: <salesforce:basic-connection>
-  securityToken: "EIED11KOyF2Oc8LSxCecUYxM"    # Used in listen-jira-sub-issue.xml: <salesforce:basic-connection>
+  username: "dev-excel@check.com"               # {Update} Used in listen-jira-sub-issue.xml: <salesforce:basic-connection>
+  password: "Excel1-2"                         # {Update} Used in listen-jira-sub-issue.xml: <salesforce:basic-connection>
+  securityToken: "EIED11KOyF2Oc8LSxCecUYxM"    # {Update} Used in listen-jira-sub-issue.xml: <salesforce:basic-connection>
 
   # Salesforce Object Types and External IDs
   position:
